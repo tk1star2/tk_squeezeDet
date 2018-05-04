@@ -29,10 +29,10 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string(
     'mode', 'image', """'image' or 'video'.""")
 tf.app.flags.DEFINE_string(
-    'checkpoint', '/tmp/bichen/logs/SqueezeDet/train/model.ckpt-481000',
+    'checkpoint', './data/model_checkpoints/squeezeDet/model.ckpt-87000',
     """Path to the model parameter file.""")
 tf.app.flags.DEFINE_string(
-    'input_path', './data/sample.png',
+    'input_path', './data/sample*.png',
     """Input image or video to be detected. Can process glob input such as """
     """./data/00000*.png.""")
 tf.app.flags.DEFINE_string(
@@ -161,7 +161,7 @@ def video_demo():
 def image_demo():
   """Detect image."""
 
-  assert FLAGS.demo_net == 'squeezeDet' or FLAGS.demo_net == 'squeezeDet+', \
+  assert FLAGS.demo_net == 'squeezeDet' or FLAGS.demo_net == 'squeezeDet+' or FLAGS.demo_net == 'vgg16' or FLAGS.demo_net == 'res50' , \
       'Selected nueral net architecture not supported: {}'.format(FLAGS.demo_net)
 
   with tf.Graph().as_default():
@@ -177,22 +177,41 @@ def image_demo():
       mc.BATCH_SIZE = 1
       mc.LOAD_PRETRAINED_MODEL = False
       model = SqueezeDetPlus(mc, FLAGS.gpu)
+    elif FLAGS.demo_net == 'vgg16':
+      mc = kitti_vgg16_config()
+      mc.BATCH_SIZE = 1
+      mc.LOAD_PRETRAINED_MODEL = False
+      model = VGG16ConvDet(mc, FLAGS.gpu)
+    elif FLAGS.demo_net == 'res50':
+      mc = kitti_res50_config()
+      mc.BATCH_SIZE = 1
+      mc.LOAD_PRETRAINED_MODEL = False
+      model = ResNet50ConvDet(mc, FLAGS.gpu)
 
     saver = tf.train.Saver(model.model_params)
 
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
       saver.restore(sess, FLAGS.checkpoint)
 
+      times = {}
       for f in glob.iglob(FLAGS.input_path):
+        t_start = time.time()
+
         im = cv2.imread(f)
         im = im.astype(np.float32, copy=False)
         im = cv2.resize(im, (mc.IMAGE_WIDTH, mc.IMAGE_HEIGHT))
         input_image = im - mc.BGR_MEANS
 
+        t_reshape = time.time()
+        times['reshape']= t_reshape - t_start
+
         # Detect
         det_boxes, det_probs, det_class = sess.run(
             [model.det_boxes, model.det_probs, model.det_class],
             feed_dict={model.image_input:[input_image]})
+
+        t_detect = time.time()
+        times['detect']= t_detect - t_reshape
 
         # Filter
         final_boxes, final_probs, final_class = model.filter_prediction(
@@ -203,6 +222,9 @@ def image_demo():
         final_boxes = [final_boxes[idx] for idx in keep_idx]
         final_probs = [final_probs[idx] for idx in keep_idx]
         final_class = [final_class[idx] for idx in keep_idx]
+
+        t_filter = time.time()
+        times['filter']= t_filter - t_detect
 
         # TODO(bichen): move this color dict to configuration file
         cls2clr = {
@@ -219,10 +241,25 @@ def image_demo():
             cdict=cls2clr,
         )
 
+        t_draw = time.time()
+        times['draw']= t_draw - t_filter
+
         file_name = os.path.split(f)[1]
         out_file_name = os.path.join(FLAGS.out_dir, 'out_'+file_name)
         cv2.imwrite(out_file_name, im)
         print ('Image detection output saved to {}'.format(out_file_name))
+
+        times['total']= time.time() - t_start
+
+        # time_str = ''
+        # for t in times:
+        #   time_str += '{} time: {:.4f} '.format(t[0], t[1])
+        # time_str += '\n'
+        time_str = 'Total time: {:.4f}, detection time: {:.4f}, filter time: '\
+                   '{:.4f}'. \
+            format(times['total'], times['detect'], times['filter'])
+
+        print (time_str)
 
 
 def main(argv=None):

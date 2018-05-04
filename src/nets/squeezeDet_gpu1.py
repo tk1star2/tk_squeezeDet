@@ -14,9 +14,9 @@ from utils import util
 from easydict import EasyDict as edict
 import numpy as np
 import tensorflow as tf
-from nn_skeleton import ModelSkeleton
+from nn_skeleton_gpu1 import ModelSkeleton
 
-class SqueezeDet(ModelSkeleton):
+class SqueezeDet_gpu1(ModelSkeleton):
   def __init__(self, mc, gpu_id=0):
     with tf.device('/gpu:{}'.format(gpu_id)):
     #with tf.device('/cpu:0'):

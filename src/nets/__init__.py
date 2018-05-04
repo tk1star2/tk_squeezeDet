@@ -1,4 +1,6 @@
 from squeezeDet import SqueezeDet
 from squeezeDetPlus import SqueezeDetPlus
+from squeezeDet_gpu0 import SqueezeDet_gpu0
+from squeezeDet_gpu1 import SqueezeDet_gpu1
 from resnet50_convDet import ResNet50ConvDet
 from vgg16_convDet import VGG16ConvDet

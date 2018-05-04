@@ -109,7 +109,8 @@ def train():
   with tf.Graph().as_default():
 
     assert FLAGS.net == 'vgg16' or FLAGS.net == 'resnet50' \
-        or FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+', \
+        or FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+' \
+        or FLAGS.net == 'squeezeDet_gpu0' or FLAGS.net == 'squeezeDet_gpu1', \
         'Selected neural net architecture not supported: {}'.format(FLAGS.net)
     if FLAGS.net == 'vgg16':
       mc = kitti_vgg16_config()
@@ -126,6 +127,16 @@ def train():
       mc.IS_TRAINING = True
       mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
       model = SqueezeDet(mc)
+    elif FLAGS.net == 'squeezeDet_gpu0':
+      mc = kitti_squeezeDet_config()
+      mc.IS_TRAINING = True
+      mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
+      model = SqueezeDet_gpu0(mc)
+    elif FLAGS.net == 'squeezeDet_gpu1':
+      mc = kitti_squeezeDet_config()
+      mc.IS_TRAINING = True
+      mc.PRETRAINED_MODEL_PATH = FLAGS.pretrained_model_path
+      model = SqueezeDet_gpu1(mc)
     elif FLAGS.net == 'squeezeDet+':
       mc = kitti_squeezeDetPlus_config()
       mc.IS_TRAINING = True

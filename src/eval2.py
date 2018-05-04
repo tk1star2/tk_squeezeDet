@@ -42,7 +42,7 @@ tf.app.flags.DEFINE_boolean('run_once', False,
                              """Whether to run eval only once.""")
 tf.app.flags.DEFINE_string('net', 'squeezeDet',
                            """Neural net architecture.""")
-tf.app.flags.DEFINE_string('gpu', '1', """gpu id.""")
+#tf.app.flags.DEFINE_string('gpu', '0', """gpu id.""")
 
 
 def eval_once(
@@ -138,11 +138,12 @@ def evaluate():
   assert FLAGS.dataset == 'KITTI', \
       'Currently only supports KITTI dataset'
 
-  os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu
+ # os.environ['CUDA_VISIBLE_DEVICES'] = FLAGS.gpu
+  CUDA_VISIBLE_DEVICES=""
   with tf.Graph().as_default() as g:
+
     assert FLAGS.net == 'vgg16' or FLAGS.net == 'resnet50' \
-        or FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+' \
-        or FLAGS.net == 'squeezeDet_gpu0' or FLAGS.net == 'squeezeDet_gpu1', \
+        or FLAGS.net == 'squeezeDet' or FLAGS.net == 'squeezeDet+', \
         'Selected neural net architecture not supported: {}'.format(FLAGS.net)
     if FLAGS.net == 'vgg16':
       mc = kitti_vgg16_config()
@@ -159,16 +160,6 @@ def evaluate():
       mc.BATCH_SIZE = 1 # TODO(bichen): allow batch size > 1
       mc.LOAD_PRETRAINED_MODEL = False
       model = SqueezeDet(mc)
-    elif FLAGS.net == 'squeezeDet_gpu0':
-      mc = kitti_squeezeDet_config()
-      mc.BATCH_SIZE = 1 # TODO(bichen): allow batch size > 1
-      mc.LOAD_PRETRAINED_MODEL = False
-      model = SqueezeDet_gpu0(mc)
-    elif FLAGS.net == 'squeezeDet_gpu1':
-      mc = kitti_squeezeDet_config()
-      mc.BATCH_SIZE = 1 # TODO(bichen): allow batch size > 1
-      mc.LOAD_PRETRAINED_MODEL = False
-      model = SqueezeDet_gpu1(mc)
     elif FLAGS.net == 'squeezeDet+':
       mc = kitti_squeezeDetPlus_config()
       mc.BATCH_SIZE = 1 # TODO(bichen): allow batch size > 1

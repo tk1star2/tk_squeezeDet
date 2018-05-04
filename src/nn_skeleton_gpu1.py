@@ -696,16 +696,16 @@ class ModelSkeleton:
 #      print("-----------------------------------------------------------------------------------")
       #--------------------------------------------------------------------------------
 
-
+      print("\n\n\n\ngpu1 version!!\n\n\n\n")
       #----------------------------------tk : version2--------------------------------------------	
       print("-----------------------------------------------------------------------------------")
 
       print("inputs?? {}".format(inputs))
-      inputs_revised = self._quantize(inputs, 8)
+      inputs_revised = self._quantize(inputs, 16)
       print("revised_input?? {}".format(inputs_revised))
       print("                                             ***                                   ")
       print("kernel?? {}".format(kernel))
-      kernel_revised = self._quantize(kernel, 8)
+      kernel_revised = self._quantize(kernel, 16)
       print("revised_kernel?? {}".format(kernel_revised))
       print("                                             ***                                   ")
 
