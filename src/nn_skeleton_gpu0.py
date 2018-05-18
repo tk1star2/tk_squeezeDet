@@ -701,11 +701,11 @@ class ModelSkeleton:
       print("-----------------------------------------------------------------------------------")
 
       print("inputs?? {}".format(inputs))
-      inputs_revised = self._quantize(inputs, 8)
+      inputs_revised = self._quantize(inputs, 1)
       print("revised_input?? {}".format(inputs_revised))
       print("                                             ***                                   ")
       print("kernel?? {}".format(kernel))
-      kernel_revised = self._quantize(kernel, 16)
+      kernel_revised = self._quantize(kernel, 5)
       print("revised_kernel?? {}".format(kernel_revised))
       print("                                             ***                                   ")
 

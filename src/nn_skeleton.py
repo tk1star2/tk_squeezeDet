@@ -701,20 +701,23 @@ class ModelSkeleton:
       print("-----------------------------------------------------------------------------------")
 
       print("inputs?? {}".format(inputs))
-      inputs_revised = self._quantize(inputs, 8)
+      inputs_revised = tf.cast(inputs, tf.float16)
+      #inputs_revised = self._quantize(inputs, 10)
       print("revised_input?? {}".format(inputs_revised))
       print("                                             ***                                   ")
       print("kernel?? {}".format(kernel))
-      kernel_revised = self._quantize(kernel, 8)
+      kernel_revised = tf.cast(inputs, tf.float16)
+      #kernel_revised = self._quantize(kernel, 10)
       print("revised_kernel?? {}".format(kernel_revised))
       print("                                             ***                                   ")
 
-      conv = tf.nn.conv2d(
+      before_conv = tf.nn.conv2d(
           inputs_revised, kernel_revised, [1, stride, stride, 1], padding=padding,
           name='convolution')
       print("conv?? {}".format(conv))
       print("                                             ***                                   ")
 
+      conv = tf.cast(before_conv, tf.float32)
       print("bias?? {}".format(biases))
       print("-----------------------------------------------------------------------------------")
       #--------------------------------------------------------------------------------

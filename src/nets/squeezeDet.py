@@ -26,9 +26,9 @@ class SqueezeDet(ModelSkeleton):
       print("debug1.................................................add_forward__graph : end")
       self._add_interpretation_graph()
       print("debug2..........................................add_interpretation_graph : end")
-      self._add_loss_graph()
+      #self._add_loss_graph()
       print("debug3.................................................add_loas_graph : end")
-      self._add_train_graph()
+      #self._add_train_graph()
       print("debug4...............................................add_train_graph : end")
       self._add_viz_graph()
       print("debug5...............................................add_viz_graph : end")
@@ -45,7 +45,7 @@ class SqueezeDet(ModelSkeleton):
           '  {}'.format(mc.PRETRAINED_MODEL_PATH)
       self.caffemodel_weight = joblib.load(mc.PRETRAINED_MODEL_PATH)
 
-    conv1 = self._conv_layer(
+    conv1 = self._quantized_conv_layer(
         'conv1', self.image_input, filters=64, size=3, stride=2,
         padding='SAME', freeze=True)
     pool1 = self._pooling_layer(
@@ -87,7 +87,8 @@ class SqueezeDet(ModelSkeleton):
 #----------------------------------------------------------------
     num_output = mc.ANCHOR_PER_GRID * (mc.CLASSES + 1 + 4)
     print("\n\n\n\nnum_output here!!!!! {}\n\n\n\n".format(num_output))
-    self.preds = self._conv_layer(
+    #1
+    self.preds = self._quantized_conv_layer(
         'conv12', dropout11, filters=num_output, size=3, stride=1,
         padding='SAME', xavier=False, relu=False, stddev=0.0001)
 
@@ -134,11 +135,12 @@ class SqueezeDet(ModelSkeleton):
     Returns:
       fire layer operation.
     """
-
-    sq1x1 = self._conv_layer(
+    #2
+    sq1x1 = self._quantized_conv_layer(
         layer_name+'/squeeze1x1', inputs, filters=s1x1, size=1, stride=1,
         padding='SAME', stddev=stddev, freeze=freeze)
-    ex1x1 = self._conv_layer(
+    #3
+    ex1x1 = self._quantized_conv_layer(
         layer_name+'/expand1x1', sq1x1, filters=e1x1, size=1, stride=1,
         padding='SAME', stddev=stddev, freeze=freeze)
     ex3x3 = self._quantized_conv_layer(
